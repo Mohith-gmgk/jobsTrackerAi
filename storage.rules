@@ -1,0 +1,12 @@
+// storage.rules
+// Firebase Storage is NOT used in this project (free plan compatible).
+// Resumes are stored as extracted text directly in Firestore.
+// This file is kept as a placeholder only.
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if false; // nothing stored here
+    }
+  }
+}

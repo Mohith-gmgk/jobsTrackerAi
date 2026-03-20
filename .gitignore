@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Environment — NEVER commit real .env files
+.env
+.env.local
+.env.production
+frontend/.env
+backend/.env
+
+# Build output
+dist/
+build/
+.vite/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore.indexes.json
+
+# Test coverage
+coverage/
