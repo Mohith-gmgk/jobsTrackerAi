@@ -20,7 +20,12 @@ initFirebaseAdmin();
 const server = Fastify({ logger: true });
 
 await server.register(cors, {
-  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  origin: [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    process.env.FRONTEND_URL || "",
+    "https://jobs-tracker-ai.vercel.app",
+  ].filter(Boolean),
   credentials: true,
 });
 
