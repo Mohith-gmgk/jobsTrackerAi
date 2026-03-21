@@ -1,4 +1,4 @@
-// useJobFeed.js - Final clean version with scoring lock
+// useJobFeed.js - Shows jobs instantly, scores in background
 import { useEffect, useCallback, useRef } from "react";
 import { fetchJobs, matchJobs } from "../services/api.js";
 import { useStore, useFilters } from "../store/index.js";
@@ -7,23 +7,15 @@ export function useJobFeed() {
   const filters = useFilters();
   const { setJobs, setJobsLoading, setJobsError, resumeText } = useStore();
   const resumeTextRef = useRef(resumeText);
-  const isScoringRef = useRef(false); // Lock to prevent concurrent scoring
+  const isScoringRef = useRef(false);
 
-  // Keep ref updated
-  useEffect(() => {
-    resumeTextRef.current = resumeText;
-  }, [resumeText]);
+  useEffect(() => { resumeTextRef.current = resumeText; }, [resumeText]);
 
   const loadJobs = useCallback(async () => {
-    // Prevent concurrent scoring runs
-    if (isScoringRef.current) {
-      console.log("⏳ Scoring already in progress, skipping...");
-      return;
-    }
-
+    if (isScoringRef.current) return;
+    isScoringRef.current = true;
     setJobsLoading(true);
     setJobsError(null);
-    isScoringRef.current = true;
 
     try {
       const data = await fetchJobs({
@@ -33,11 +25,16 @@ export function useJobFeed() {
       });
 
       let jobs = data.jobs || [];
-      const currentResumeText = resumeTextRef.current;
-      console.log(`📡 ${jobs.length} jobs fetched | resume: ${currentResumeText?.length || 0} chars`);
+      console.log(`📡 ${jobs.length} jobs fetched`);
 
+      // ── STEP 1: Show jobs immediately without scores ──────────────────────
+      setJobs([...jobs]);
+      setJobsLoading(false); // Stop loading spinner — jobs visible now!
+
+      // ── STEP 2: Score in background (non-blocking) ────────────────────────
+      const currentResumeText = resumeTextRef.current;
       if (currentResumeText && currentResumeText.length > 50) {
-        console.log("🎯 Scoring jobs...");
+        console.log("🎯 Scoring in background...");
         try {
           const matchData = await matchJobs(
             currentResumeText,
@@ -45,8 +42,6 @@ export function useJobFeed() {
           );
 
           const matches = matchData?.matches || [];
-          console.log(`✅ Got ${matches.length} scores`);
-
           if (matches.length > 0) {
             const scoreById = {};
             matches.forEach((m, idx) => {
@@ -54,7 +49,8 @@ export function useJobFeed() {
               scoreById[`idx_${idx}`] = m;
             });
 
-            jobs = jobs.map((j, idx) => {
+            // Update jobs with scores
+            const scoredJobs = jobs.map((j, idx) => {
               const match = scoreById[j.id] || scoreById[`idx_${idx}`];
               return {
                 ...j,
@@ -63,27 +59,24 @@ export function useJobFeed() {
               };
             });
 
-            console.log("✅ Scores:", jobs.slice(0,5).map(j => `${j.matchScore}%`).join(", "));
+            console.log("✅ Scores applied:", scoredJobs.filter(j => j.matchScore > 0).length, "jobs scored");
+            setJobs([...scoredJobs]); // Update with scores
           }
         } catch (err) {
           console.error("❌ Scoring error:", err.message);
         }
       }
-
-      setJobs([...jobs]);
     } catch (err) {
       if (err.name !== "AbortError") {
         setJobsError(err.message);
+        setJobsLoading(false);
       }
     } finally {
-      setJobsLoading(false);
-      isScoringRef.current = false; // Release lock
+      isScoringRef.current = false;
     }
   }, [filters.role, filters.location]);
 
-  useEffect(() => {
-    loadJobs();
-  }, [loadJobs]);
+  useEffect(() => { loadJobs(); }, [loadJobs]);
 
   return { reload: loadJobs };
 }
