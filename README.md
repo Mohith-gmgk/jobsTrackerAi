@@ -1,141 +1,223 @@
 # ⚡ JobsTrackerAI — AI-Powered Job Tracker with Smart Matching
 
-> Find your perfect job with AI-powered matching, natural language search, voice input, and smart application tracking.
+<div align="center">
 
-**⚠️ Note:** Job Feed page takes **10-15 seconds** to load — this is normal. Jobs are fetched from Adzuna API first, then each job is scored against your resume using AI (Groq LLM). Please wait for the match scores (%) to appear on each card.
+![JobsTrackerAI](https://img.shields.io/badge/JobsTrackerAI-AI%20Powered-6366f1?style=for-the-badge&logo=lightning&logoColor=white)
+![React](https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Node.js](https://img.shields.io/badge/Node.js-Fastify-68A063?style=for-the-badge&logo=node.js&logoColor=white)
+![LangChain](https://img.shields.io/badge/LangChain-AI%20Matching-1C3C3C?style=for-the-badge)
+![LangGraph](https://img.shields.io/badge/LangGraph-Orchestration-1C3C3C?style=for-the-badge)
+![Firebase](https://img.shields.io/badge/Firebase-Auth%20%2B%20Firestore-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
 
-**Live Demo:** `[Your Deployed URL]` | **GitHub:** `[Your Repo URL]`
+**A full-stack AI-powered job tracking platform that fetches real jobs, intelligently matches them to your resume, and lets a conversational AI assistant control your search filters in real time.**
 
----
+[Live Demo](https://jobs-tracker-ai.vercel.app) · [GitHub Repository](https://github.com/Mohith-gmgk/jobsTrackerAi)
 
-## Architecture Diagram
-
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                    FRONTEND (React + Vite)                               │
-│                                                                          │
-│  ┌─────────────┐  ┌─────────────┐  ┌──────────────┐  ┌───────────────┐  │
-│  │  Job Feed   │  │  Filters    │  │  Application │  │  AI Assistant │  │
-│  │  + Best     │  │  Panel      │  │  Tracker     │  │  Chat Bubble  │  │
-│  │  Matches    │  │  (50+skills)│  │  + Pie Chart │  │  + 🎙️ Voice   │  │
-│  │  Applied ✓  │  │  Dark/Light │  │  + Follow-up │  │  + Memory     │  │
-│  └──────┬──────┘  └──────┬──────┘  └──────┬───────┘  └───────┬───────┘  │
-│         └────────────────┴─────────────────┴──────────────────┘          │
-│                         Zustand Global Store                              │
-└────────────────────────────────────┬─────────────────────────────────────┘
-                                     │ HTTP (axios — 2min timeout for scoring)
-                    ┌────────────────▼─────────────────┐
-                    │        BACKEND (Fastify)           │
-                    │                                    │
-                    │  GET  /api/jobs ─────────────────► Adzuna API        │
-                    │  POST /api/resume ───────────────► Firestore         │
-                    │  POST /api/match ─────────────────► LangChain+Groq  │
-                    │  POST /api/assistant ─────────────► LangGraph+Groq  │
-                    │  CRUD /api/applications ──────────► Firestore        │
-                    │  POST /api/resume-tips ───────────► Groq AI          │
-                    │  POST /api/cover-letter ──────────► Groq AI          │
-                    └──────────┬──────────┬─────────────┘
-                               │          │
-              ┌────────────────▼──┐  ┌────▼──────────────────────────────┐
-              │   LangChain       │  │  LangGraph (AI Assistant)          │
-              │   Job Matcher     │  │                                    │
-              │  @langchain/groq  │  │  intent_classifier                 │
-              │  llama-3.1-8b     │  │       ↓ (conditional edge)         │
-              │  Score 0-100%     │  │  ┌──────────────────────────────┐  │
-              │  Per-job explain  │  │  │ job_search | filter_update   │  │
-              └───────────────────┘  │  │ _node      | _node → UI      │  │
-                                     │  │            | help_node        │  │
-                                     │  └──────────────────────────────┘  │
-                                     │       ↓                             │
-                                     │  response_formatter                 │
-                                     └─────────────────────────────────────┘
-                                                    │
-                              ┌─────────────────────▼──────────────────────┐
-                              │  Firebase (Spark Plan — Free)               │
-                              │  Auth: Email/password                        │
-                              │  Firestore: users + applications             │
-                              │  No Storage needed (resume text in Firestore)│
-                              └────────────────────────────────────────────┘
-```
+</div>
 
 ---
 
-## All Features
+## 📋 Table of Contents
 
-### Core (Required)
-- ✅ **Job Feed** — Real jobs from Adzuna API
-- ✅ **7 Filters** — Role, Skills (50+), Date, Job Type, Work Mode, Location, Match Score
-- ✅ **AI Matching (LangChain)** — Every job scored 0-100% against uploaded resume
-- ✅ **Color Badges** — 🟢 Green >70%, 🟡 Yellow 40-70%, ⚪ Gray <40%
-- ✅ **Best Matches** — Top 6-8 highest scoring jobs shown at top
-- ✅ **Resume Upload** — PDF or TXT, stored as text in Firestore (no Storage billing)
-- ✅ **Replace Resume** — 📄 Resume button in header anytime
-- ✅ **Smart Apply Popup** — "Did you apply?" with Yes/No/Applied Earlier
-- ✅ **Application Tracker** — Pipeline: Applied → Interview → Offer/Rejected
-- ✅ **Timeline per Application** — Full status history with correct timestamps
-- ✅ **AI Assistant (LangGraph)** — Directly controls UI filters from chat
-- ✅ **Natural Language Search** — "Show me remote React jobs" → filters update
-- ✅ **Product Help** — "How does matching work?" → AI answers
-- ✅ **Applied ✓ Button** — Jobs you've applied to show green "✓ Applied" in feed
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Setup Instructions](#setup-instructions)
+- [LangChain & LangGraph Usage](#langchain--langgraph-usage)
+- [AI Matching Logic](#ai-matching-logic)
+- [Popup Flow Design](#popup-flow-design)
+- [AI Assistant UI Choice](#ai-assistant-ui-choice)
+- [Scalability](#scalability)
+- [Tradeoffs](#tradeoffs)
 
-### Bonus Features
-- ✅ **🎙️ Voice Input** — Click mic in AI chat, speak your query (Chrome)
-- ✅ **💡 Resume Tips** — AI gives 3 actionable tips per job (~3 sec)
-- ✅ **📧 Cover Letter** — AI generates personalized cover letter (~5 sec)
-- ✅ **📊 Pie Chart Analytics** — Visual pipeline breakdown with rates
-- ✅ **⏰ Follow-up Reminders** — Banner shows all pending applied jobs
-- ✅ **☀️/🌙 Dark/Light Mode** — Full theme toggle in header
-- ✅ **Conversation Memory** — AI remembers last 6 messages
-- ✅ **Advanced LangGraph** — Conditional edges, 4-node routing
+---
+
+## Overview
+
+JobsTrackerAI is a production-grade job tracking application built for the modern job seeker. It combines real-time job data from the Adzuna API with AI-powered resume matching and a conversational assistant that directly manipulates UI state — no manual filter clicks required.
+
+> ⚠️ **Note:** The Job Feed takes **10-15 seconds** to fully load. Jobs appear within 2-3 seconds, then AI match scores are calculated in the background. This is expected behavior during AI scoring.
+
+**Test Credentials:**
+- Email: `test@gmail.com`
+- Password: `test@123`
+
+---
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                      FRONTEND  (React 18 + Vite)                    │
+│                                                                     │
+│  ┌──────────────┐  ┌─────────────┐  ┌─────────────┐  ┌──────────┐ │
+│  │   Job Feed   │  │   Filters   │  │ Application │  │    AI    │ │
+│  │  + Scoring   │  │  50+ Skills │  │   Tracker   │  │Assistant │ │
+│  │  + Applied✓  │  │  Dark/Light │  │  Pie Chart  │  │ + Voice  │ │
+│  └──────┬───────┘  └──────┬──────┘  └──────┬──────┘  └────┬─────┘ │
+│         └─────────────────┴─────────────────┴──────────────┘       │
+│                        Zustand Global Store                         │
+│           { jobs, filters, applications, user, resume }             │
+└──────────────────────────────┬──────────────────────────────────────┘
+                               │ HTTP / axios (2min timeout)
+               ┌───────────────▼──────────────────┐
+               │       BACKEND  (Fastify + Node.js) │
+               │                                    │
+               │  GET  /api/jobs          ────────► Adzuna Jobs API  │
+               │  POST /api/resume        ────────► Firestore        │
+               │  POST /api/match         ────────► LangChain + AI   │
+               │  POST /api/assistant     ────────► LangGraph + AI   │
+               │  CRUD /api/applications  ────────► Firestore        │
+               │  POST /api/resume-tips   ────────► AI               │
+               │  POST /api/cover-letter  ────────► AI               │
+               └───────────┬──────────────────────┘
+                           │
+          ┌────────────────┴────────────────┐
+          │                                 │
+   ┌──────▼───────┐              ┌──────────▼──────────────────────┐
+   │  LangChain   │              │  LangGraph (AI Assistant)        │
+   │  Job Matcher │              │                                  │
+   │              │              │  __start__                       │
+   │  ChatOpenAI  │              │      ↓                           │
+   │  gpt-3.5     │              │  intent_classifier               │
+   │  Score 0-100 │              │      ↓ (conditional edge)        │
+   │  + Explain   │              │  ┌─────────────────────────┐    │
+   └──────────────┘              │  │ job_search_node          │    │
+                                 │  │ filter_update_node → UI  │    │
+                                 │  │ help_node                │    │
+                                 │  └─────────────────────────┘    │
+                                 │      ↓                           │
+                                 │  response_formatter              │
+                                 │      ↓                           │
+                                 │  __end__                         │
+                                 └──────────────────────────────────┘
+                                           │
+                    ┌──────────────────────▼─────────────────────┐
+                    │  Firebase  (Free Spark Plan)                │
+                    │  ├── Auth: Email/Password authentication    │
+                    │  └── Firestore: users + applications        │
+                    └────────────────────────────────────────────┘
+```
+
+---
+
+## Features
+
+### ✅ Core Features (All Requirements Met)
+
+| Feature | Description |
+|---|---|
+| **Real Job Feed** | Fetches live jobs from Adzuna API with pagination |
+| **7 Smart Filters** | Role, Skills (50+), Date Posted, Job Type, Work Mode, Location, Match Score |
+| **AI Job Matching** | LangChain scores every job 0-100% against your uploaded resume |
+| **Color-Coded Badges** | 🟢 Green (>70%), 🟡 Yellow (40-70%), ⚪ Gray (<40%) |
+| **Best Matches Section** | Top 6-8 highest scoring jobs displayed prominently at top |
+| **Resume Upload** | PDF or TXT — text extracted and stored in Firestore |
+| **Resume Replace** | Update resume anytime via 📄 button in header |
+| **Smart Apply Popup** | "Did you apply?" popup on tab return with 3 options |
+| **Application Tracker** | Full pipeline: Applied → Interview → Offer → Rejected |
+| **Timeline per Application** | Timestamped history of every status change |
+| **AI Assistant** | LangGraph-powered chat that directly controls UI filters |
+| **Natural Language Search** | "Show remote React jobs" → filters update automatically |
+| **Applied ✓ Indicator** | Jobs you've applied to show green "✓ Applied" badge in feed |
+| **Product Help** | AI answers questions about all app features |
+
+### 🚀 Bonus Features
+
+| Feature | Description |
+|---|---|
+| **🎙️ Voice Input** | Speak queries in AI chat — Web Speech API (Chrome) |
+| **💡 Resume Tips** | AI generates 3 specific, actionable tips per job |
+| **📧 Cover Letter** | AI writes personalized cover letter from resume + job |
+| **📊 Pie Chart Analytics** | Visual pipeline breakdown with interview & offer rates |
+| **⏰ Follow-up Reminders** | Smart banner highlights applications needing follow-up |
+| **☀️/🌙 Dark/Light Mode** | Full theme toggle with CSS variable system |
+| **📱 Mobile Responsive** | Bottom navigation, slide-in filter drawer, dropdown menu |
+| **🔀 Advanced LangGraph** | Conditional edges routing across 4 specialized nodes |
+| **🧠 Conversation Memory** | AI remembers last 6 messages for contextual responses |
+| **⚡ Background Scoring** | Jobs display instantly, AI scores load progressively |
+
+---
+
+## Tech Stack
+
+| Layer | Technology | Version | Purpose |
+|---|---|---|---|
+| Frontend Framework | React | 18.3 | UI components |
+| Build Tool | Vite | 5.3 | Fast dev server + bundling |
+| State Management | Zustand | 4.5 | Global app state |
+| Routing | React Router | 6.26 | Client-side navigation |
+| HTTP Client | Axios | 1.7 | API calls with interceptors |
+| Animations | Framer Motion | 11.3 | Smooth transitions |
+| Backend Framework | Fastify | 4.28 | High-performance Node.js server |
+| AI Matching | LangChain (`@langchain/openai`) | 0.3 | Resume-job scoring chain |
+| AI Orchestration | LangGraph (`@langchain/langgraph`) | 0.2 | Multi-node AI graph |
+| LLM Provider | OpenAI GPT-3.5-turbo | — | Language model |
+| Job Data | Adzuna API | v1 | Real-time job listings |
+| Authentication | Firebase Auth | 10.12 | Email/password login |
+| Database | Firebase Firestore | 10.12 | Applications + user data |
+| File Parsing | pdf-parse | 1.1.1 | Resume PDF text extraction |
+| Deployment | Vercel + Render | — | Frontend + Backend hosting |
 
 ---
 
 ## Setup Instructions
 
 ### Prerequisites
-- Node.js 20+, npm 10+
+
+- Node.js 20+
+- npm 10+
 - Firebase project (free Spark plan)
-- Groq API key — free at **https://console.groq.com**
-- Adzuna API — free at **https://developer.adzuna.com**
-- Anthropic API key — **https://console.anthropic.com**
+- OpenAI API key — [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
+- Adzuna API credentials — [developer.adzuna.com](https://developer.adzuna.com)
 
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/jobstrackerai.git
-cd jobstrackerai
-npm run install:all
+git clone https://github.com/Mohith-gmgk/jobsTrackerAi.git
+cd jobsTrackerAi
+
+# Install root dependencies
+npm install
+
+# Install backend
+cd backend && npm install
+
+# Install frontend
+cd ../frontend && npm install
 ```
 
 ### 2. Firebase Setup
 
-1. Create project at **https://console.firebase.google.com**
+1. Create project at [console.firebase.google.com](https://console.firebase.google.com)
 2. Enable **Authentication → Email/Password**
 3. Enable **Firestore Database** (start in test mode)
-4. **Web SDK config** → Project Settings → Your Apps → Web → Register → copy config
-5. **Admin SDK** → Project Settings → Service Accounts → Generate new private key
+4. Get **Web SDK config** → Project Settings → Your Apps → Web
+5. Get **Admin SDK key** → Project Settings → Service Accounts → Generate key
 
 **Create Firestore Composite Index:**
 ```
-URL: https://console.firebase.google.com/project/YOUR_PROJECT_ID/firestore/indexes
-→ Composite tab → Create index
-  Collection: applications
-  Field 1: userId — Ascending
-  Field 2: createdAt — Descending
-  Scope: Collection
+Go to: Firestore → Indexes → Composite → Create index
+Collection ID:  applications
+Field 1:        userId      → Ascending
+Field 2:        createdAt   → Descending
+Query scope:    Collection
 ```
 
-### 3. Fill Environment Variables
+### 3. Environment Variables
 
 **`backend/.env`**
 ```env
 PORT=3001
 FRONTEND_URL=http://localhost:5173
-ANTHROPIC_API_KEY=sk-ant-...
-GROQ_API_KEY=gsk_...
-ADZUNA_APP_ID=your_id
-ADZUNA_APP_KEY=your_key
+
+OPENAI_API_KEY=sk-proj-...
+
+ADZUNA_APP_ID=your_app_id
+ADZUNA_APP_KEY=your_app_key
 ADZUNA_COUNTRY=us
+
 FIREBASE_PROJECT_ID=your-project-id
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 FIREBASE_CLIENT_EMAIL=firebase-adminsdk@your-project.iam.gserviceaccount.com
@@ -152,13 +234,13 @@ VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
 VITE_FIREBASE_APP_ID=1:123456789:web:abc123
 ```
 
-### 4. Create Test User (run once)
+### 4. Create Test User
 
 ```bash
 node scripts/setup-firebase.js
 ```
 
-Creates: `test@gmail.com` / `test@123`
+This creates `test@gmail.com` / `test@123` in Firebase Auth.
 
 ### 5. Run Locally
 
@@ -166,131 +248,258 @@ Creates: `test@gmail.com` / `test@123`
 npm run dev
 ```
 
-- Frontend: **http://localhost:5173**
-- Backend: **http://localhost:3001**
-
-⚠️ **Job Feed takes 10-15 seconds** — jobs are fetched then AI-scored sequentially. This is expected behavior.
+- **Frontend:** http://localhost:5173
+- **Backend:** http://localhost:3001/health
 
 ---
 
 ## LangChain & LangGraph Usage
 
-### LangChain: Job Matching (`backend/src/services/langchain/jobMatcher.js`)
+### LangChain: Job Matching
+
+LangChain orchestrates OpenAI GPT-3.5-turbo to score each job against the candidate's resume using a structured prompting pipeline:
 
 ```
 Resume Text + Job Description
          ↓
-   SystemMessage (scoring rubric prompt)
-   HumanMessage (resume + job details)
+   SystemMessage  (scoring rubric + JSON output format)
+   HumanMessage   (resume snippet + job details)
          ↓
-   ChatGroq via @langchain/groq (llama-3.1-8b-instant)
+   ChatOpenAI  (gpt-3.5-turbo, temp=0.1)
          ↓
-   JSON: { score: 85, matchingSkills: [...], relevantExperience: "..." }
+   JSON Output Parser
+         ↓
+   { score: 85, matchingSkills: [...], relevantExperience: "...", keywordsAlignment: "..." }
 ```
 
-Jobs scored sequentially, 500ms apart to respect Groq rate limits (6000 TPM).
+**File:** `backend/src/services/langchain/jobMatcher.js`
 
-### LangGraph: AI Assistant (`backend/src/services/langgraph/`)
+Jobs are scored sequentially with 200ms delay between requests. The `batchScoreJobs()` function processes all 20 jobs and returns normalized scores with explanations.
 
-**4-node graph with conditional edges:**
+### LangGraph: AI Assistant
+
+A 4-node directed graph with conditional routing handles all AI assistant interactions:
 
 ```
 __start__
     ↓
-intent_classifier (Groq) → classifies: job_search | filter_update | clear_filters | help
-    ↓ conditional edge
-    ├─► job_search_node    → extracts search params → UPDATE_FILTERS action
-    ├─► filter_update_node → extracts filter values → UPDATE_FILTERS action
-    └─► help_node          → conversational answers → NONE action
+intent_classifier          ← Classifies: job_search | filter_update | clear_filters | help
     ↓
-response_formatter → shapes final { message, uiAction }
+    ├─► job_search_node    ← Extracts search params → UPDATE_FILTERS uiAction
+    ├─► filter_update_node ← Extracts filter values → UPDATE_FILTERS uiAction
+    └─► help_node          ← Generates conversational response → NONE uiAction
+    ↓
+response_formatter         ← Shapes { message, uiAction } response
     ↓
 __end__
 ```
 
-The `uiAction.payload` is sent to frontend → `applyFilterActions()` in Zustand updates filter state → job feed re-renders. **This is how AI controls the UI directly.**
+**File:** `backend/src/services/langgraph/graph.js`
 
-### Prompt Design
-- **Scoring:** Low temp (0.1), short prompts for speed, JSON-only output enforced
-- **Intent:** Temp 0 for deterministic classification
-- **Filters:** Temp 0, only extract explicitly mentioned fields
-- **Help:** Temp 0.3 for natural conversation, 6-message history for memory
+The critical mechanism: every node returns a `uiAction` object. When `type === "UPDATE_FILTERS"`, the frontend's `useAssistant` hook calls `applyFilterActions()` in Zustand — **directly mutating filter state** and triggering a job re-fetch. This is how the AI controls the UI in real time without any user interaction.
+
+### Prompt Design Philosophy
+
+| Node | Temperature | Strategy |
+|---|---|---|
+| Job Matching | 0.1 | Low temp for consistent numeric scores |
+| Intent Classifier | 0.0 | Deterministic classification |
+| Filter Extractor | 0.0 | Only extract explicitly mentioned fields |
+| Help Node | 0.3 | Slightly creative for natural conversation |
 
 ---
 
 ## AI Matching Logic
 
-**Scoring rubric:**
-- 80-100: Excellent (70%+ skills match, directly relevant experience)
-- 50-79: Good (40-70% match, transferable experience)
-- 20-49: Partial (some relevant skills)
-- 0-19: Poor match
+**Approach:** Rather than simple keyword counting (which is brittle), the LLM acts as an expert recruiter performing semantic comparison. It understands that "React experience" is relevant to a "Frontend JavaScript Developer" role even without exact keyword matches.
 
-**Why it works:** LLM semantic understanding beats keyword matching — "React experience" matches "Frontend development with modern JS frameworks."
+**Scoring Rubric:**
 
-**Performance:** 20 jobs × 500ms = ~10-15 seconds total. First 8 jobs show scores while rest load.
+| Score Range | Meaning |
+|---|---|
+| 80 – 100 | Excellent match: 70%+ required skills present, directly relevant experience |
+| 50 – 79 | Good match: 40-70% skills, transferable experience |
+| 20 – 49 | Partial match: some relevant skills, limited experience alignment |
+| 0 – 19 | Poor match: few shared skills or experience |
+
+**Output per job:**
+```json
+{
+  "score": 82,
+  "matchingSkills": ["React", "TypeScript", "Node.js"],
+  "relevantExperience": "3 years frontend development with React",
+  "keywordsAlignment": "Strong overlap in modern JS stack"
+}
+```
+
+**Performance Optimization:** Jobs are displayed immediately from Adzuna (2-3 seconds). Scoring runs as a background process, updating the UI progressively as each batch completes — eliminating the perceived 15-second wait.
 
 ---
 
 ## Popup Flow Design
 
-1. Click **Apply →** → job URL opens in new tab
-2. `visibilitychange` event fires when user returns
-3. 800ms delay → popup appears: "Did you apply to X at Y?"
-4. Three options:
-   - **Yes, Applied** → saves with Firestore Timestamp
-   - **Applied Earlier** → also saves (retroactive tracking)
-   - **No, just browsing** → dismisses, nothing saved
+**Why this design:**
 
-**Edge cases:** Multiple Apply clicks → last job wins. Network failure → popup stays open to retry.
+When a user clicks "Apply →", the job opens in a new tab (preserving their session in the app). We listen for the `visibilitychange` event to detect when they return, then show a popup after an 800ms delay to avoid jarring the user.
+
+**Three options cover every real-world scenario:**
+
+| Option | Action | When to Use |
+|---|---|---|
+| ✅ Yes, Applied | Saves with current Firestore Timestamp | Normal application flow |
+| 📅 Applied Earlier | Also saves (marked as applied) | Retroactive tracking |
+| No, just browsing | Dismisses without saving | Accidental click |
+
+**Edge cases handled:**
+- Multiple Apply clicks → last job wins (popup overwrites)
+- Network failure on save → toast error, popup persists for retry
+- User closes tab without returning → popup remains on next return
 
 ---
 
-## AI Assistant UI: Floating Bubble (Bottom-Right)
+## AI Assistant UI Choice: Floating Bubble
 
-**Why bubble over sidebar:**
-- Mobile-first — 56×56px, never blocks job cards
-- Filter panel still visible when AI updates filters
-- Red ✕ close button — high contrast, easy to find
-- Voice input 🎙️ — speak instead of type
+**Selected: Option A — Floating Chat Bubble (bottom-right)**
+
+**Reasoning:**
+
+1. **Non-intrusive** — Users can browse jobs while chat is closed. A sidebar would force a permanent space tradeoff.
+2. **Mobile-first** — The bubble is always 56×56px regardless of screen size. A sidebar would consume 40% of mobile screen width.
+3. **Filter feedback is visible** — When the AI updates filters, the left filter panel updates in real time. Users can see the effect without the chat panel blocking it.
+4. **Clear close button** — Red ✕ button is high-contrast and immediately recognizable.
+5. **Voice input integration** — The 🎙️ mic button fits naturally in the compact input bar.
 
 ---
 
 ## Scalability
 
-**100+ jobs:** Client-side filtering is O(n), no extra API calls. Scoring is sequential per batch.
+### Handling 100+ Jobs
 
-**10,000 users:**
-- Firestore auto-scales horizontally
-- Stateless Fastify backend → horizontal scaling behind load balancer
-- Redis cache for Adzuna responses (jobs don't change per-second)
-- Background queue (BullMQ) for scoring → instant API response
-- Groq rate limits → upgrade to Dev tier or add retry with exponential backoff
+- Client-side filtering runs on the in-memory job array — O(n) complexity, no additional API calls
+- AI scoring processes jobs in batches of 5 sequentially
+- Pagination support ready via Adzuna `page` parameter
+
+### Handling 10,000 Users
+
+| Component | Current | At Scale |
+|---|---|---|
+| Firestore | Auto-scales horizontally | Implement security rules + indexes |
+| Backend | Single Fastify instance | Multiple instances behind load balancer |
+| AI Scoring | Per-request (synchronous) | Background queue (BullMQ + Redis) |
+| Job Data | Fresh fetch per request | Redis cache (5min TTL) |
+| Resume Storage | Text in Firestore | Vector embeddings in Pinecone |
 
 ---
 
 ## Tradeoffs
 
-| Known Limitation | Production Fix |
+| Known Limitation | Production Solution |
 |---|---|
-| Job feed takes 10-15s | Background scoring queue |
-| Groq 6000 TPM free limit | Paid tier or batching strategy |
-| Voice input: Chrome only | Whisper API for all browsers |
-| Resume text capped at 800 chars | Vector embeddings for full resume |
-| No real-time application updates | Firestore real-time listeners |
+| Job feed takes 2-15 seconds | Pre-score jobs in background queue; serve cached results |
+| OpenAI API costs per request | Cache scores by jobId + resumeHash; invalidate on resume update |
+| Voice input: Chrome only | Integrate OpenAI Whisper API for cross-browser support |
+| Resume text capped at 1200 chars | Chunking + vector embeddings for full document analysis |
+| No real-time application updates | Firebase Firestore real-time listeners (`onSnapshot`) |
+| Single resume per user | Resume versioning with timestamp history |
 
 ---
 
-## Tech Stack
+## Bonus Features Implemented
 
-| Layer | Technology |
+| Bonus | Implementation |
 |---|---|
-| Frontend | React 18, Vite, Zustand, React Router |
-| Backend | Node.js, Fastify |
-| AI Matching | LangChain (`@langchain/groq`) |
-| AI Orchestration | LangGraph (`@langchain/langgraph`) |
-| LLM | Groq (llama-3.1-8b-instant) |
-| Job Data | Adzuna API |
-| Auth | Firebase Auth |
-| Database | Firebase Firestore |
-| Deployment | Render (backend) + Vercel (frontend) |
+| ✅ Advanced LangGraph | Conditional edges routing across 4 specialized nodes |
+| ✅ Conversation Memory | Last 6 messages passed to helpNode for context |
+| ✅ Smooth UI Animations | CSS keyframes + staggered `animation-delay` on cards |
+| ✅ Voice Input | Web Speech API integrated in AI chat input |
+| ✅ Mobile-First Design | Bottom navigation, slide-in filter drawer, responsive header |
+| ✅ Resume Tips Generator | 3 specific, job-targeted tips per card |
+| ✅ Cover Letter Generator | Personalized letter from resume + job description |
+| ✅ Analytics Dashboard | Pie chart + interview rate + offer rate + avg match score |
+| ✅ Follow-up Reminders | Smart banner for applications pending response |
+| ✅ Dark / Light Mode | Full CSS variable theme system with instant toggle |
+
+---
+
+## Project Structure
+
+```
+jobsTrackerAi/
+├── backend/
+│   ├── src/
+│   │   ├── config/
+│   │   │   └── firebase.js              # Firebase Admin initialization
+│   │   ├── routes/
+│   │   │   ├── jobRoutes.js             # GET /api/jobs
+│   │   │   ├── resumeRoutes.js          # POST/GET /api/resume
+│   │   │   ├── matchRoutes.js           # POST /api/match
+│   │   │   ├── assistantRoutes.js       # POST /api/assistant
+│   │   │   ├── applicationRoutes.js     # CRUD /api/applications
+│   │   │   ├── resumeTipsRoutes.js      # POST /api/resume-tips
+│   │   │   └── coverLetterRoutes.js     # POST /api/cover-letter
+│   │   ├── services/
+│   │   │   ├── adzunaService.js         # Adzuna API + normalization
+│   │   │   ├── langchain/
+│   │   │   │   └── jobMatcher.js        # LangChain scoring chain
+│   │   │   └── langgraph/
+│   │   │       ├── graph.js             # LangGraph compiled graph
+│   │   │       └── nodes/
+│   │   │           ├── intentClassifier.js
+│   │   │           ├── filterUpdateNode.js
+│   │   │           ├── jobSearchNode.js
+│   │   │           ├── helpNode.js
+│   │   │           └── responseFormatter.js
+│   │   └── server.js                    # Fastify entry point
+│   ├── .env.example
+│   └── package.json
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── AIAssistant/             # Chat bubble + voice input
+│   │   │   ├── ApplicationTracker/      # Tracker + pie chart + analytics
+│   │   │   ├── Filters/                 # 50+ skill chips + 7 filters
+│   │   │   ├── JobCard/                 # Card + score ring + tips + cover letter
+│   │   │   ├── JobFeed/                 # Best matches + all jobs
+│   │   │   ├── Layout/                  # Header (desktop + mobile)
+│   │   │   ├── Common/                  # Apply popup
+│   │   │   └── Resume/                  # Resume upload manager
+│   │   ├── hooks/
+│   │   │   ├── useJobFeed.js            # Fetch + background scoring
+│   │   │   ├── useAssistant.js          # AI chat + filter mutations
+│   │   │   ├── useApplyFlow.js          # Apply popup logic
+│   │   │   ├── useVoiceInput.js         # Web Speech API
+│   │   │   └── useFollowUpNotifications.js
+│   │   ├── pages/
+│   │   │   ├── LoginPage.jsx
+│   │   │   ├── OnboardingPage.jsx
+│   │   │   └── MainPage.jsx
+│   │   ├── services/
+│   │   │   ├── api.js                   # Axios instance + all endpoints
+│   │   │   └── firebase.js              # Firebase Web SDK
+│   │   ├── store/
+│   │   │   └── index.js                 # Zustand global store
+│   │   ├── styles/
+│   │   │   └── globals.css              # Design system + dark/light mode
+│   │   └── utils/
+│   │       ├── scoring.js               # Badge colors + client filters
+│   │       └── toast.js                 # Notification system
+│   ├── .env.example
+│   └── package.json
+├── scripts/
+│   └── setup-firebase.js                # Creates test user
+├── CLAUDE.md                            # Architecture reference
+├── firestore.rules                      # Security rules
+├── firestore.indexes.json               # Composite index definitions
+├── .gitignore
+└── README.md
+```
+
+---
+
+<div align="center">
+
+Built with ❤️ for the AI Engineering Internship Assignment
+
+**Stack:** React · Fastify · LangChain · LangGraph · OpenAI · Firebase · Adzuna · Vercel · Render
+
+</div>
