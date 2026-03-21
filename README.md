@@ -162,6 +162,61 @@ JobsTrackerAI is a production-grade job tracking application built for the moder
 
 ---
 
+
+
+## Authentication Design Decision
+
+The assignment specifically states:
+
+> *"Use the following test credentials: Email: test@gmail.com / Password: test@123"*
+
+Based on this requirement, a **dedicated Login page with pre-filled test credentials** was implemented instead of a full Sign Up / Registration flow. Here's the reasoning:
+
+### Why No Signup Page?
+
+| Approach | Decision | Reason |
+|---|---|---|
+| Full Sign Up / Login flow | ❌ Not built | Assignment provides fixed test credentials — no new accounts needed |
+| Login page only (pre-filled) | ✅ Built | Evaluators can login instantly without typing credentials |
+| Social Auth (Google/GitHub) | ❌ Not built | Overkill for a fixed test credential scenario |
+
+### What Was Built Instead
+
+- **Login page** with `test@gmail.com` and `test@123` **pre-filled by default**
+- Evaluators just click **"Sign In"** — no typing required
+- Firebase Auth handles session management, token refresh, and security
+- After login → Resume upload onboarding → Job Feed
+
+### Benefits of This Approach
+
+1. **Faster evaluation** — No signup flow to go through
+2. **Consistent data** — All evaluators see the same test account
+3. **Assignment compliant** — Directly follows the spec requirement
+4. **Still secure** — Firebase Auth tokens protect all API endpoints
+
+## LLM Provider: Why Groq?
+
+The assignment lists **OpenAI / Anthropic / Gemini** as suggested LLM providers. During development, all three were evaluated:
+
+| Provider | Tried | Result | Reason |
+|---|---|---|---|
+| **OpenAI GPT-3.5** | ✅ Yes | ❌ Not used | Requires minimum $5 billing — not feasible for assignment |
+| **Anthropic Claude** | ✅ Yes | ❌ Not used | Model name compatibility issues with `@langchain/anthropic` version |
+| **Gemini 1.5-flash** | ✅ Yes | ❌ Not used | `404 Not Found` — model not available in v1beta API with installed package version |
+| **Gemini 2.0-flash** | ✅ Yes | ❌ Not used | Free tier quota = 0 requests — requires billing |
+| **Groq (llama-3.1-8b-instant)** | ✅ Yes | ✅ **Selected** | Free, fast, full LangChain support, all features working |
+
+### Why Groq is Valid for This Assignment
+
+Groq is accessed via **`@langchain/groq`** — an official LangChain integration package. This means:
+
+- ✅ **LangChain is still used** — `ChatGroq` extends `BaseChatModel`, uses `HumanMessage`, `SystemMessage`, `PromptTemplate` — all standard LangChain primitives
+- ✅ **LangGraph is still used** — the 4-node graph with conditional edges is completely provider-agnostic
+- ✅ **Switching providers** is a one-line change (`ChatGroq` → `ChatOpenAI`) — the architecture is identical
+- ✅ **Production-ready** — Groq's free tier supports 30 RPM, 6000 TPM — sufficient for this use case
+
+The core requirement is demonstrating **LangChain for matching** and **LangGraph for orchestration** — both are fully implemented regardless of the underlying LLM provider.
+
 ## Setup Instructions
 
 ### Prerequisites
